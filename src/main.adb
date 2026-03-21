@@ -305,8 +305,26 @@ procedure Main is
             begin
                if (TR in 1 .. Maze.Max_Rows) and then (TC in 1 .. Maze.Max_Cols) then
                   if Grid (TR, TC) = Brick then
-                     Grid (TR, TC) := Empty;
                      Score := Score + Score_Brick;
+                     declare
+                        Roll : constant Integer := (abs (Rand_Int.Random (Gen)) mod 100) + 1;
+                     begin
+                        if Roll <= Settings.Item_Appear_Prob then
+                           declare
+                              Item_Roll : constant Integer := (abs (Rand_Int.Random (Gen)) mod 100) + 1;
+                           begin
+                              if Item_Roll <= Settings.Item_Life_Prob then
+                                 Grid (TR, TC) := Item_Life;
+                              elsif Item_Roll <= Settings.Item_Life_Prob + Settings.Item_Score_Prob then
+                                 Grid (TR, TC) := Item_Score;
+                              else
+                                 Grid (TR, TC) := Door;
+                              end if;
+                           end;
+                        else
+                           Grid (TR, TC) := Empty;
+                        end if;
+                     end;
                   end if;
                end if;
             end;
@@ -325,14 +343,18 @@ procedure Main is
          if Player_Row < B.Row then DR := -1;
          elsif Player_Row > B.Row then DR := 1; end if;
          
-         if DR /= 0 and then Grid (B.Row + DR, B.Col) = Maze.Empty then
+         if DR /= 0 and then (Grid (B.Row + DR, B.Col) = Maze.Empty 
+                             or Grid (B.Row + DR, B.Col) = Maze.Item_Life 
+                             or Grid (B.Row + DR, B.Col) = Maze.Item_Score) then
             B.Row := B.Row + DR; return True;
          end if;
          
          if Player_Col < B.Col then DC := -1;
          elsif Player_Col > B.Col then DC := 1; end if;
          
-         if DC /= 0 and then Grid (B.Row, B.Col + DC) = Maze.Empty then
+         if DC /= 0 and then (Grid (B.Row, B.Col + DC) = Maze.Empty 
+                             or Grid (B.Row, B.Col + DC) = Maze.Item_Life 
+                             or Grid (B.Row, B.Col + DC) = Maze.Item_Score) then
             B.Col := B.Col + DC; return True;
          end if;
          
@@ -345,7 +367,9 @@ procedure Main is
          Try_Dir := (abs (Rand_Int.Random (Gen)) mod 4);
          
          if B.Dir_R /= 0 or B.Dir_C /= 0 then
-            if Grid (B.Row + B.Dir_R, B.Col + B.Dir_C) = Maze.Empty then
+            if Grid (B.Row + B.Dir_R, B.Col + B.Dir_C) = Maze.Empty 
+               or Grid (B.Row + B.Dir_R, B.Col + B.Dir_C) = Maze.Item_Life 
+               or Grid (B.Row + B.Dir_R, B.Col + B.Dir_C) = Maze.Item_Score then
                if Rand_Int.Random (Gen) < 70 then
                   B.Row := B.Row + B.Dir_R;
                   B.Col := B.Col + B.Dir_C;
@@ -365,7 +389,9 @@ procedure Main is
                elsif D = 2 then TC := TC - 1;
                else TC := TC + 1; end if;
                
-               if Grid (TR, TC) = Maze.Empty then
+               if Grid (TR, TC) = Maze.Empty 
+                  or Grid (TR, TC) = Maze.Item_Life 
+                  or Grid (TR, TC) = Maze.Item_Score then
                   B.Dir_R := TR - B.Row;
                   B.Dir_C := TC - B.Col;
                   B.Row := TR;
@@ -375,6 +401,20 @@ procedure Main is
             end;
          end loop;
       end Random_Move;
+
+   procedure Handle_Balloon_Collision (R, C : Integer) is
+   begin
+      if Grid (R, C) = Maze.Item_Score then
+         if Score > Settings.Score_Bonus_Points then
+            Score := Score - Settings.Score_Bonus_Points;
+         else
+            Score := 0;
+         end if;
+      end if;
+      if Grid (R, C) = Maze.Item_Life or Grid (R, C) = Maze.Item_Score then
+         Grid (R, C) := Maze.Empty;
+      end if;
+   end Handle_Balloon_Collision;
 
    begin
       for I in Balloons'Range loop
@@ -387,12 +427,15 @@ procedure Main is
                Random_Move (Balloons (I));
             end if;
             
+            Handle_Balloon_Collision (Balloons (I).Row, Balloons (I).Col);
+            
             if (Balloons (I).Row = Player_Row) and then (Balloons (I).Col = Player_Col) and then (not Player_Dead) then
                Lose_Life;
             end if;
          end if;
       end loop;
    end Move_Balloons;
+
    
    procedure Check_Level_Cleared is
       Any_Active : Boolean := False;
@@ -411,6 +454,31 @@ procedure Main is
          Reset_Level (New_Layout => True);
       end if;
    end Check_Level_Cleared;
+
+   procedure Handle_Player_Collision is
+   begin
+      case Grid (Player_Row, Player_Col) is
+         when Maze.Item_Life =>
+            if Lives < Settings.Max_Lives_Limit then
+               Lives := Lives + 1;
+            else
+               Score := Score + Settings.Score_Extra_Life;
+            end if;
+            Grid (Player_Row, Player_Col) := Maze.Empty;
+         when Maze.Item_Score =>
+            Score := Score + Settings.Score_Bonus_Points;
+            Grid (Player_Row, Player_Col) := Maze.Empty;
+         when Maze.Door =>
+            Current_Level := Current_Level + 1;
+            if Current_Level > Settings.Max_Levels then
+               Current_Level := 1;
+            end if;
+            Reset_Level (New_Layout => True);
+         when others =>
+            null;
+      end case;
+   end Handle_Player_Collision;
+
 
    Ch : Key_Code;
 begin
@@ -448,6 +516,9 @@ begin
          Init_Pair (Color_Balloon_H_ID, Red, Black);
          Init_Pair (Color_Balloon_D_ID, White, Black);
          Init_Pair (Color_Status_ID, White, Black);
+         Init_Pair (Color_Item_Life_ID, Green, Blue);
+         Init_Pair (Color_Item_Score_ID, Yellow, Blue);
+         Init_Pair (Color_Door_ID, White, Blue);
       exception
          when others => null;
       end;
@@ -563,6 +634,15 @@ begin
                            when Maze.Empty =>
                               Set_Character_Attributes (Standard_Window, Color => Color_Empty_ID);
                               Add (Standard_Window, " ");
+                           when Maze.Item_Life =>
+                              Set_Character_Attributes (Standard_Window, Color => Color_Item_Life_ID);
+                              Add (Standard_Window, String'[1 => Settings.Char_Item_Life]);
+                           when Maze.Item_Score =>
+                              Set_Character_Attributes (Standard_Window, Color => Color_Item_Score_ID);
+                              Add (Standard_Window, String'[1 => Settings.Char_Item_Score]);
+                           when Maze.Door =>
+                              Set_Character_Attributes (Standard_Window, Color => Color_Door_ID);
+                              Add (Standard_Window, String'[1 => Settings.Char_Door]);
                         end case;
                      end if;
                   end loop;
@@ -641,7 +721,7 @@ begin
                                                  "   LIVES: " & Pad (Lives, 2) & " ";
                   Padding   : constant Integer := (Integer (C_Count) - Status'Length) / 2;
                   Pad_Str   : constant String (1 .. (if Padding > 0 then Padding else 0)) 
-                                              := (others => ' ');
+                                              := [others => ' '];
                begin
                   Move_Cursor (Standard_Window, L_Off + Line_Position (Maze.Max_Rows + 1), 0);
                   Set_Character_Attributes (Standard_Window, Color => Color_Status_ID);
@@ -710,8 +790,9 @@ begin
                   end if;
                end loop;
             elsif Ch = Key_Cursor_Up or else Ch = Character'Pos('w') or else Ch = Character'Pos('W') then
-               if Grid (Player_Row - 1, Player_Col) = Maze.Empty then
+               if Grid (Player_Row - 1, Player_Col) /= Maze.Wall and then Grid (Player_Row - 1, Player_Col) /= Maze.Brick then
                   Player_Row := Player_Row - 1; 
+                  Handle_Player_Collision;
                   for I in Balloons'Range loop
                      if Balloons (I).Active and then (Balloons (I).Death_Tick = 0) and then (Balloons (I).Row = Player_Row) and then (Balloons (I).Col = Player_Col) then
                         Lose_Life;
@@ -719,8 +800,9 @@ begin
                   end loop;
                end if;
             elsif Ch = Key_Cursor_Down or else Ch = Character'Pos('s') or else Ch = Character'Pos('S') then
-               if Grid (Player_Row + 1, Player_Col) = Maze.Empty then
+               if Grid (Player_Row + 1, Player_Col) /= Maze.Wall and then Grid (Player_Row + 1, Player_Col) /= Maze.Brick then
                   Player_Row := Player_Row + 1;
+                  Handle_Player_Collision;
                   for I in Balloons'Range loop
                      if Balloons (I).Active and then (Balloons (I).Death_Tick = 0) and then (Balloons (I).Row = Player_Row) and then (Balloons (I).Col = Player_Col) then
                         Lose_Life;
@@ -728,8 +810,9 @@ begin
                   end loop;
                end if;
             elsif Ch = Key_Cursor_Left or else Ch = Character'Pos('a') or else Ch = Character'Pos('A') then
-               if Grid (Player_Row, Player_Col - 1) = Maze.Empty then
+               if Grid (Player_Row, Player_Col - 1) /= Maze.Wall and then Grid (Player_Row, Player_Col - 1) /= Maze.Brick then
                   Player_Col := Player_Col - 1;
+                  Handle_Player_Collision;
                   for I in Balloons'Range loop
                      if Balloons (I).Active and then (Balloons (I).Death_Tick = 0) and then (Balloons (I).Row = Player_Row) and then (Balloons (I).Col = Player_Col) then
                         Lose_Life;
@@ -737,8 +820,9 @@ begin
                   end loop;
                end if;
             elsif Ch = Key_Cursor_Right or else Ch = Character'Pos('d') or else Ch = Character'Pos('D') then
-               if Grid (Player_Row, Player_Col + 1) = Maze.Empty then
+               if Grid (Player_Row, Player_Col + 1) /= Maze.Wall and then Grid (Player_Row, Player_Col + 1) /= Maze.Brick then
                   Player_Col := Player_Col + 1;
+                  Handle_Player_Collision;
                   for I in Balloons'Range loop
                      if Balloons (I).Active and then (Balloons (I).Death_Tick = 0) and then (Balloons (I).Row = Player_Row) and then (Balloons (I).Col = Player_Col) then
                         Lose_Life;

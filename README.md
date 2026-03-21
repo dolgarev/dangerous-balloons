@@ -15,6 +15,10 @@ The game takes place in a 23x23 maze filled with walls, bricks, and deadly ballo
 | `*`    | Explosion      | Created by bombs; destroys bricks and balloons |
 | `X`    | Dead Hero      | Visible during death animation                 |
 | `1-5`  | Bomb           | Ticking bomb (number shows remaining seconds)  |
+| `L`    | Extra Life     | Adds +1 life (max 5)                           |
+| `$`    | Bonus Points   | Adds +200 points                               |
+| `D`    | Door           | Transitions to the next level immediately      |
+
 
 ### Rules
 
@@ -29,9 +33,18 @@ The game takes place in a 23x23 maze filled with walls, bricks, and deadly ballo
   - **Friendly (Magenta)**: Moves randomly every second.
   - **Hostile (Red)**: Actively chases the player.
   - The behavior switches every **8 seconds**.
-- **Progression**: Destroy all balloons on the screen to advance to the next level.
-- **Lives**: You start with **3 lives**. Touching a balloon or being caught in an explosion loses a life.
+- **Lives**: You start with **3 lives**. Touching a balloon or being caught in an explosion loses a life. Maximum lives allowed is **5**.
+- **Items (Power-ups)**:
+  - Destroying bricks has a **10% chance** to drop an item.
+  - **Extra Life (`L`)**: Adds +1 life. If lives are at max, gives **+100 points**.
+  - **Bonus Points (`$`)**: Gives **+200 points**.
+  - **Door (`D`)**: Appears extremely rarely (5% of drops). Stepping on it advances you to the next level.
+  - **Balloons & Items**: Balloons can also collect items! 
+    - Collecting a life (`L`) simply removes it from the board.
+    - Collecting points (`$`) **subtracts** 200 points from the player's score.
+- **Progression**: Clear all balloons on the screen **OR** find and enter the Door to advance to the next level.
 - **Levels**: There are **10 levels**. Each level increases the number of initial balloons.
+
 
 ## Controls
 
@@ -88,7 +101,10 @@ All game balance parameters and visuals can be tweaked in [`src/settings.ads`](s
 | `Bomb_Timer_Sec`     | Bomb countdown length (5s)                    |
 | `Mode_Switch_Sec`    | Time between balloon behavior swaps (8s)      |
 | `Char_Brick`         | Visual representation of destructible blocks  |
+| `Item_Appear_Prob`   | Probability (1-100) of an item drop (10)     |
+| `Max_Lives_Limit`    | Maximum player lives (5)                      |
 | `Player_Death_Ticks` | Duration of the flickering death animation    |
+
 
 ---
 

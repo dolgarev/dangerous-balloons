@@ -11,9 +11,18 @@ package Settings is
    Initial_Balloons : constant := 4;
    Max_Bombs        : constant := 5;
    Max_Balloons     : constant := 20;
-   Bomb_Timer_Sec   : constant := 5;
-   Mode_Switch_Sec  : constant := 8;
-   Brick_Probability : constant := 40; -- Probability to spawn a brick adjacent to a wall (1-100)
+   Bomb_Timer_Sec    : constant := 5;
+   Mode_Switch_Sec   : constant := 8;
+   Brick_Probability : constant := 40;
+
+   -- Items and Progression
+   Item_Appear_Prob   : constant := 10; -- 10% chance for an item to appear
+   Item_Life_Prob     : constant := 20; -- 20% of items are lives
+   Item_Score_Prob    : constant := 75; -- 75% of items are scores (remaining 5% is Door)
+   
+   Max_Lives_Limit    : constant := 5;
+   Score_Extra_Life   : constant := 100; -- if lives are maxed
+   Score_Bonus_Points : constant := 200;
 
    -- Scoring
    Score_Brick     : constant := 10;
@@ -33,6 +42,9 @@ package Settings is
    Char_Balloon     : constant Character := 'Q';
    Char_Explosion   : constant Character := '*';
    Char_Dead_Player : constant Character := 'X';
+   Char_Item_Life   : constant Character := 'L';
+   Char_Item_Score  : constant Character := '$';
+   Char_Door        : constant Character := 'D';
 
    -- Color Pair IDs
    Color_Wall_ID      : constant := 1;
@@ -45,5 +57,8 @@ package Settings is
    Color_Balloon_H_ID : constant := 8;
    Color_Balloon_D_ID : constant := 9;
    Color_Status_ID    : constant := 10;
+   Color_Item_Life_ID : constant := 11;
+   Color_Item_Score_ID: constant := 12;
+   Color_Door_ID      : constant := 13;
 
 end Settings;

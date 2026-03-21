@@ -2,7 +2,7 @@ with Settings;
 
 package Maze is
 
-   type Cell_Type is (Empty, Wall, Brick);
+   type Cell_Type is (Empty, Wall, Brick, Item_Life, Item_Score, Door);
    
    Max_Rows : constant Positive := Settings.Max_Rows;
    Max_Cols : constant Positive := Settings.Max_Cols;
