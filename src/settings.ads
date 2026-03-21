@@ -13,6 +13,7 @@ package Settings is
    Max_Balloons     : constant := 20;
    Bomb_Timer_Sec   : constant := 5;
    Mode_Switch_Sec  : constant := 8;
+   Brick_Probability : constant := 40; -- Probability to spawn a brick adjacent to a wall (1-100)
 
    -- Scoring
    Score_Brick     : constant := 10;

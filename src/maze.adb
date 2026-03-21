@@ -6,13 +6,11 @@ package body Maze is
       subtype Prob_Range is Integer range 1 .. 100;
       package Random_Prob is new Ada.Numerics.Discrete_Random (Prob_Range);
       Gen : Random_Prob.Generator;
-      Brick_Probability : constant Integer := 40; -- Probability to spawn a brick adjacent to a wall
-      
       procedure Try_Place_Brick (R, C : Integer) is
       begin
          if R > 1 and then R < Max_Rows and then C > 1 and then C < Max_Cols then
             if Grid (R, C) = Empty then
-               if Random_Prob.Random (Gen) <= Brick_Probability then
+               if Random_Prob.Random (Gen) <= Settings.Brick_Probability then
                   Grid (R, C) := Brick;
                end if;
             end if;
