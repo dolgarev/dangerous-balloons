@@ -266,28 +266,32 @@ procedure Main is
    begin
       for DR in Integer range -1 .. 1 loop
          for DC in Integer range -1 .. 1 loop
-            declare
-               TR : constant Integer := BR + DR;
-               TC : constant Integer := BC + DC;
-            begin
-               if (TR in 1 .. Maze.Max_Rows) and then (TC in 1 .. Maze.Max_Cols) then
-                  if Grid (TR, TC) /= Wall then
-                     if (Player_Row = TR) and then (Player_Col = TC) and then (not Player_Dead) then
-                        Lose_Life;
-                     end if;
-                     for J in Balloons'Range loop
-                        if Balloons (J).Active and then (Balloons (J).Death_Tick = 0) and then (Balloons (J).Row = TR) and then (Balloons (J).Col = TC) then
-                           Balloons (J).Death_Tick := Settings.Balloon_Death_Ticks;
-                           if Global_Balloon_Mode = Friendly then
-                              Score := Score + Score_Balloon_F;
-                           else
-                              Score := Score + Score_Balloon_H;
+            if abs (DR) + abs (DC) <= 1 then
+               declare
+                  TR : constant Integer := BR + DR;
+                  TC : constant Integer := BC + DC;
+               begin
+                  if (TR in 1 .. Maze.Max_Rows) and then (TC in 1 .. Maze.Max_Cols) then
+                     if Grid (TR, TC) /= Wall then
+                        if (Player_Row = TR) and then (Player_Col = TC) and then (not Player_Dead) then
+                           Lose_Life;
+                         end if;
+
+                        for J in Balloons'Range loop
+                           if Balloons (J).Active and then (Balloons (J).Death_Tick = 0) 
+                              and then (Balloons (J).Row = TR) and then (Balloons (J).Col = TC) then
+                              Balloons (J).Death_Tick := Settings.Balloon_Death_Ticks;
+                              if Global_Balloon_Mode = Friendly then
+                                 Score := Score + Score_Balloon_F;
+                              else
+                                 Score := Score + Score_Balloon_H;
+                              end if;
                            end if;
-                        end if;
-                     end loop;
+                        end loop;
+                     end if;
                   end if;
-               end if;
-            end;
+               end;
+            end if;
          end loop;
       end loop;
    end Check_Explosion_Damage;
@@ -299,35 +303,39 @@ procedure Main is
       Bombs (B_Idx).Explosion_Tick := Explosion_Duration_Ticks;
       for DR in Integer range -1 .. 1 loop
          for DC in Integer range -1 .. 1 loop
-            declare
-               TR : constant Integer := BR + DR;
-               TC : constant Integer := BC + DC;
-            begin
-               if (TR in 1 .. Maze.Max_Rows) and then (TC in 1 .. Maze.Max_Cols) then
-                  if Grid (TR, TC) = Brick then
-                     Score := Score + Score_Brick;
-                     declare
-                        Roll : constant Integer := (abs (Rand_Int.Random (Gen)) mod 100) + 1;
-                     begin
-                        if Roll <= Settings.Item_Appear_Prob then
-                           declare
-                              Item_Roll : constant Integer := (abs (Rand_Int.Random (Gen)) mod 100) + 1;
-                           begin
-                              if Item_Roll <= Settings.Item_Life_Prob then
-                                 Grid (TR, TC) := Item_Life;
-                              elsif Item_Roll <= Settings.Item_Life_Prob + Settings.Item_Score_Prob then
-                                 Grid (TR, TC) := Item_Score;
-                              else
-                                 Grid (TR, TC) := Door;
-                              end if;
-                           end;
-                        else
-                           Grid (TR, TC) := Empty;
-                        end if;
-                     end;
+            if abs (DR) + abs (DC) <= 1 then
+               declare
+                  TR : constant Integer := BR + DR;
+                  TC : constant Integer := BC + DC;
+               begin
+                  if (TR in 1 .. Maze.Max_Rows) and then (TC in 1 .. Maze.Max_Cols) then
+                     if Grid (TR, TC) = Brick then
+                        Score := Score + Score_Brick;
+                        declare
+                           Roll : constant Integer := (abs (Rand_Int.Random (Gen)) mod 100) + 1;
+                        begin
+                           if Roll <= Settings.Item_Appear_Prob then
+                              declare
+                                 Item_Roll : constant Integer := (abs (Rand_Int.Random (Gen)) mod 100) + 1;
+                              begin
+                                 if Item_Roll <= Settings.Item_Life_Prob then
+                                    Grid (TR, TC) := Item_Life;
+                                 elsif Item_Roll <= Settings.Item_Life_Prob + Settings.Item_Score_Prob then
+                                    Grid (TR, TC) := Item_Score;
+                                 else
+                                    Grid (TR, TC) := Door;
+                                 end if;
+                              end;
+                           else
+                              Grid (TR, TC) := Empty;
+                           end if;
+                        end;
+                     elsif Grid (TR, TC) = Item_Life or else Grid (TR, TC) = Item_Score then
+                        Grid (TR, TC) := Empty;
+                     end if;
                   end if;
-               end if;
-            end;
+               end;
+            end if;
          end loop;
       end loop;
       Check_Explosion_Damage (B_Idx);
@@ -584,11 +592,13 @@ begin
          end loop;
          
          for I in Balloons'Range loop
-            if Balloons (I).Active and then (Balloons (I).Death_Tick > 0) then
-               Balloons (I).Death_Tick := Balloons (I).Death_Tick - 1;
-               if Balloons (I).Death_Tick <= 0 then
-                  Balloons (I).Active := False;
-                  if not Player_Dead then Check_Level_Cleared; end if;
+            if Balloons (I).Active then
+               if Balloons (I).Death_Tick > 0 then
+                  Balloons (I).Death_Tick := Balloons (I).Death_Tick - 1;
+                  if Balloons (I).Death_Tick <= 0 then
+                     Balloons (I).Active := False;
+                     if not Player_Dead then Check_Level_Cleared; end if;
+                  end if;
                end if;
             end if;
          end loop;
@@ -641,7 +651,7 @@ begin
                               Set_Character_Attributes (Standard_Window, Color => Color_Item_Score_ID);
                               Add (Standard_Window, String'[1 => Settings.Char_Item_Score]);
                            when Maze.Door =>
-                              Set_Character_Attributes (Standard_Window, Color => Color_Door_ID);
+                              Set_Character_Attributes (Standard_Window, Attr => (Blink => True, others => False), Color => Color_Door_ID);
                               Add (Standard_Window, String'[1 => Settings.Char_Door]);
                         end case;
                      end if;
@@ -653,20 +663,22 @@ begin
                      if Bombs (I).Explosion_Tick > 0 then
                         for DR in Integer range -1 .. 1 loop
                            for DC in Integer range -1 .. 1 loop
-                              declare
-                                 TR : constant Integer := Bombs (I).Row + DR;
-                                 TC : constant Integer := Bombs (I).Col + DC;
-                              begin
-                                 if (TR in 1 .. Maze.Max_Rows) and then (TC in 1 .. Maze.Max_Cols) then
-                                    if Grid (TR, TC) /= Wall then
-                                       if (Integer (L_Off) + (TR - 1) < Integer (L_Count)) and then (Integer (C_Off) + (TC - 1) < Integer (C_Count)) then
-                                          Move_Cursor (Standard_Window, L_Off + Line_Position (TR - 1), C_Off + Column_Position (TC - 1));
-                                          Set_Character_Attributes (Standard_Window, Attr => (Reverse_Video => True, Blink => True, others => False), Color => Color_Bomb_ID);
-                                          Add (Standard_Window, String'[1 => Settings.Char_Explosion]);
+                              if abs (DR) + abs (DC) <= 1 then
+                                 declare
+                                    TR : constant Integer := Bombs (I).Row + DR;
+                                    TC : constant Integer := Bombs (I).Col + DC;
+                                 begin
+                                    if (TR in 1 .. Maze.Max_Rows) and then (TC in 1 .. Maze.Max_Cols) then
+                                       if Grid (TR, TC) /= Wall then
+                                          if (Integer (L_Off) + (TR - 1) < Integer (L_Count)) and then (Integer (C_Off) + (TC - 1) < Integer (C_Count)) then
+                                             Move_Cursor (Standard_Window, L_Off + Line_Position (TR - 1), C_Off + Column_Position (TC - 1));
+                                             Set_Character_Attributes (Standard_Window, Attr => (Reverse_Video => True, Blink => True, others => False), Color => Color_Bomb_ID);
+                                             Add (Standard_Window, String'[1 => Settings.Char_Explosion]);
+                                          end if;
                                        end if;
                                     end if;
-                                 end if;
-                              end;
+                                 end;
+                              end if;
                            end loop;
                         end loop;
                         Set_Character_Attributes (Standard_Window, Attr => (others => False), Color => Color_Empty_ID);

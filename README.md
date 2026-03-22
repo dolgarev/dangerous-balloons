@@ -13,18 +13,17 @@ The game takes place in a 23x23 maze filled with walls, bricks, and deadly ballo
 | `@`    | Hero           | Controlled by the player                       |
 | `Q`    | Balloon        | Enemy (changes behavior based on mode)         |
 | `*`    | Explosion      | Created by bombs; destroys bricks and balloons |
-| `X`    | Dead Hero      | Visible during death animation                 |
-| `1-5`  | Bomb           | Ticking bomb (number shows remaining seconds)  |
-| `L`    | Extra Life     | Adds +1 life (max 5)                           |
-| `$`    | Bonus Points   | Adds +200 points                               |
-| `D`    | Door           | Transitions to the next level immediately      |
-
+| `X`     | Dead Hero    | Visible during death animation                 |
+| `1-5`   | Bomb         | Ticking bomb (number shows remaining seconds)  |
+| `L`     | Extra Life   | Adds +1 life (max 5)                           |
+| `$`     | Bonus Points | Adds +200 points                               |
+| `E`     | Door         | Transitions to the next level immediately      |
 
 ### Rules
 
 - **Movement**: Move in 4 directions using Arrow keys or WASD.
 - **Bombs**: Press **Space** to place a bomb at your current position. A maximum of 5 bombs can be active simultaneously.
-- **Explosions**: Bombs explode after a 5-second countdown. An explosion affects the bomb's position and adjacent cells (8 directions).
+- **Explosions**: Bombs explode after a 5-second countdown. An explosion affects the bomb's position and adjacent cells in a cross pattern (4 directions).
 - **Scoring**:
   - Destroying a brick: 10 points.
   - Destroying a friendly balloon (magenta): 50 points.
@@ -38,9 +37,10 @@ The game takes place in a 23x23 maze filled with walls, bricks, and deadly ballo
   - Destroying bricks has a **10% chance** to drop an item.
   - **Extra Life (`L`)**: Adds +1 life. If lives are at max, gives **+100 points**.
   - **Bonus Points (`$`)**: Gives **+200 points**.
-  - **Door (`D`)**: Appears extremely rarely (5% of drops). Stepping on it advances you to the next level.
-  - **Balloons & Items**: Balloons can also collect items! 
-    - Collecting a life (`L`) simply removes it from the board.
+  - **Door (`E`)**: Appears extremely rarely (5% of drops). The exit is **flickering**, making it easier to spot. Stepping on it advances you to the next level.
+  - **Items & Explosions**: If a bomb explodes on an item (`$` or `L`), the item is destroyed.
+  - **Balloons & Items**: Balloons can also collect items!
+    - Collecting a life (`L`) removes it from the board.
     - Collecting points (`$`) **subtracts** 200 points from the player's score.
 - **Progression**: Clear all balloons on the screen **OR** find and enter the Door to advance to the next level.
 - **Levels**: There are **10 levels**. Each level increases the number of initial balloons.
