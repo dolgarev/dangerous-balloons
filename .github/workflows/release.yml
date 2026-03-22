@@ -1,0 +1,68 @@
+name: Build and Release Dangerous Balloons
+
+on:
+  push:
+    tags:
+      - 'v*' # Trigger only when a version tag is created, e.g., v1.0.0
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            os: ubuntu-latest
+          - arch: arm64
+            os: ubuntu-24.04-arm
+    runs-on: ${{ matrix.os }}
+    container:
+      image: ${{ matrix.arch == 'arm64' && 'debian:trixie' || 'ubuntu:latest' }}
+    permissions:
+      contents: read
+    
+    steps:
+      - name: Install Build Dependencies
+        run: |
+          apt-get update
+          apt-get install -y git gnat gprbuild libncursesada-dev
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Dangerous Balloons
+        run: |
+          mkdir -p bin
+          gprbuild -P dangerous_balloons.gpr
+          mv bin/dangerous-balloons bin/dangerous-balloons-linux-${{ matrix.arch }}
+          sha256sum bin/dangerous-balloons-linux-${{ matrix.arch }} > bin/dangerous-balloons-linux-${{ matrix.arch }}.sha256
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dangerous-balloons-binaries-${{ matrix.arch }}
+          path: bin/
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+          pattern: dangerous-balloons-binaries-*
+          merge-multiple: true
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            release-artifacts/dangerous-balloons-linux-*
+          fail_on_unmatched_files: true
+          generate_release_notes: true
+          body: "Automated Dangerous Balloons release for Linux (amd64 and arm64)."
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
