@@ -54,7 +54,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          apt-get update
+          apt-get update -o Acquire::http::No-Cache=True
           apt-get install -y gnat gprbuild libncursesada-dev squashfs-tools wget
 
       - name: Install appimagetool
