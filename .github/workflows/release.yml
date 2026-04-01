@@ -43,6 +43,7 @@ jobs:
           path: bin/
 
   build-appimage:
+    needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: read
