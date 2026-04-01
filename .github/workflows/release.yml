@@ -42,39 +42,8 @@ jobs:
           name: dangerous-balloons-binaries-${{ matrix.arch }}
           path: bin/
 
-  build-appimage:
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install Dependencies
-        run: |
-          sudo apt-get update -o Acquire::http::No-Cache=True
-          sudo apt-get install -y gnat gprbuild libncursesada-dev squashfs-tools wget
-
-      - name: Install appimagetool
-        run: |
-          wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O /tmp/appimagetool
-          chmod +x /tmp/appimagetool
-
-      - name: Build AppImage
-        run: |
-          cd appimage
-          ./build-appimage.sh
-
-      - name: Upload AppImage Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: dangerous-balloons-appimage
-          path: bin/dangerous-balloons-*-x86_64.AppImage
-
   release:
-    needs: [build, build-appimage]
+    needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -84,16 +53,16 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: release-artifacts
-          pattern: dangerous-balloons-*
+          pattern: dangerous-balloons-binaries-*
           merge-multiple: true
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            release-artifacts/dangerous-balloons-*
+            release-artifacts/dangerous-balloons-linux-*
           fail_on_unmatched_files: true
           generate_release_notes: true
-          body: "Automated Dangerous Balloons release for Linux (amd64, arm64, Desktop AppImage)."
+          body: "Automated Dangerous Balloons release for Linux (amd64 and arm64)."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
