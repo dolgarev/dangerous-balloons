@@ -506,6 +506,10 @@ procedure Main is
    procedure Check_Level_Cleared is
       Any_Active : Boolean := False;
    begin
+      if Player_Dead then
+         return;
+      end if;
+
       for I in Balloons'Range loop
          if Balloons (I).Active then
             Any_Active := True;
