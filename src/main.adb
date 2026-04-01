@@ -900,18 +900,20 @@ begin
 
                if Player_Dead and then Lives = 0 then
                   declare
-                     M1 : constant String          := " GAME OVER ";
+                     M1 : constant String          := "  GAME OVER  ";
                      C1 : constant Column_Position :=
                        C_Off +
                        Column_Position ((Maze.Max_Cols - M1'Length) / 2);
                   begin
-                     Move_Cursor
-                       (Standard_Window, L_Off + Line_Position (Maze.Max_Rows),
-                        C1);
-                     Set_Character_Attributes
-                       (Standard_Window, Color => Color_Dead_ID,
-                        Attr => (Blink => True, others => False));
-                     Add (Standard_Window, M1);
+                     if Integer (L_Off) + Maze.Max_Rows < Integer (L_Count) then
+                        Move_Cursor
+                          (Standard_Window, L_Off + Line_Position (Maze.Max_Rows),
+                           C1);
+                        Set_Character_Attributes
+                          (Standard_Window, Color => Color_Dead_ID,
+                           Attr => (Blink => True, others => False));
+                        Add (Standard_Window, M1);
+                     end if;
                   end;
                end if;
 
@@ -923,12 +925,14 @@ begin
                        C_Off +
                        Column_Position ((Maze.Max_Cols - M2'Length) / 2);
                   begin
-                     Move_Cursor
-                       (Standard_Window,
-                        L_Off + Line_Position (Maze.Max_Rows + 1), C2);
-                     Set_Character_Attributes
-                       (Standard_Window, Color => Color_Status_ID);
-                     Add (Standard_Window, M2);
+                     if Integer (L_Off) + Maze.Max_Rows + 1 < Integer (L_Count) then
+                        Move_Cursor
+                          (Standard_Window,
+                           L_Off + Line_Position (Maze.Max_Rows + 1), C2);
+                        Set_Character_Attributes
+                          (Standard_Window, Color => Color_Status_ID);
+                        Add (Standard_Window, M2);
+                     end if;
                   end;
                else
                   declare
@@ -942,12 +946,14 @@ begin
                          (1 .. (if Padding > 0 then Padding else 0)) :=
                        [others => ' '];
                   begin
-                     Move_Cursor
-                       (Standard_Window,
-                        L_Off + Line_Position (Maze.Max_Rows + 1), 0);
-                     Set_Character_Attributes
-                       (Standard_Window, Color => Color_Status_ID);
-                     Add (Standard_Window, Pad_Str & Status);
+                     if Integer (L_Off) + Maze.Max_Rows + 1 < Integer (L_Count) then
+                        Move_Cursor
+                          (Standard_Window,
+                           L_Off + Line_Position (Maze.Max_Rows + 1), 0);
+                        Set_Character_Attributes
+                          (Standard_Window, Color => Color_Status_ID);
+                        Add (Standard_Window, Pad_Str & Status);
+                     end if;
                   end;
                end if;
             end;
