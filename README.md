@@ -2,6 +2,8 @@
 
 **Dangerous Balloons** is an arcade survival game written in **Ada 2022** using the **ncurses** library. Based on the classic trap-and-destroy mechanics, your goal is to clear a maze of lethal balloons while avoiding being touched by them.
 
+<img width="1032" height="800" alt="ksnip_20260425-211013" src="https://github.com/user-attachments/assets/420fc0ee-345a-4085-8340-be0ab8f40624" />
+
 ## Gameplay
 
 The game takes place in a 23x23 maze filled with walls, bricks, and deadly balloons. You control a hero who can place bombs to clear paths and destroy enemies.
