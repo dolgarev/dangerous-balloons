@@ -6,17 +6,22 @@ with Ada.Calendar; use Ada.Calendar;
 package body Game_Logic is
 
    procedure Spawn_Balloons is
-      Placed    : Integer          := 0;
-      R, C_Idx  : Integer;
-      Max_Spawn : constant Integer :=
+      Placed      : Integer          := 0;
+      R, C_Idx    : Integer;
+      Max_Spawn   : constant Integer :=
         (Settings.Initial_Balloons - 1) + Current_Level;
+      Max_Attempts : constant Integer := Maze.Max_Rows * Maze.Max_Cols;
+      Attempts     : Integer          := 0;
    begin
       for I in Balloons'Range loop
          Balloons (I).Active     := False;
          Balloons (I).Death_Tick := 0;
       end loop;
 
-      while (Placed < Max_Spawn) and then (Placed < Balloons'Last) loop
+      while (Placed < Max_Spawn) and then (Placed < Balloons'Last)
+        and then (Attempts < Max_Attempts)
+      loop
+         Attempts := Attempts + 1;
          R     := (abs (Rand_Int.Random (Gen)) mod Maze.Max_Rows) + 1;
          C_Idx := (abs (Rand_Int.Random (Gen)) mod Maze.Max_Cols) + 1;
          if Grid (R, C_Idx) = Maze.Empty and then ((R > 4) or (C_Idx > 4)) then
@@ -53,6 +58,7 @@ package body Game_Logic is
       end loop;
       Global_Balloon_Mode := Friendly;
       Mode_Timer          := 0;
+      Balloon_Tick        := 0;
       Next_Tick           := Clock + 0.1;
    end Reset_Level;
 
