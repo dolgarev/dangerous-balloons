@@ -16,7 +16,7 @@ jobs:
             os: ubuntu-24.04-arm
     runs-on: ${{ matrix.os }}
     container:
-      image: ${{ matrix.arch == 'arm64' && 'debian:trixie' || 'ubuntu:latest' }}
+      image: ${{ matrix.arch == 'arm64' && 'debian:trixie' || 'ubuntu:24.04' }}
     permissions:
       contents: read
     

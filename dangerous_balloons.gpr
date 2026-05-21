@@ -15,7 +15,11 @@ project Dangerous_Balloons is
       for Default_Switches ("Ada") use ("-gnat2022", "-gnatwa", "-g");
    end Compiler;
 
-   package Linker is
-      for Default_Switches ("Ada") use ("-lncurses");
-   end Linker;
+    package Binder is
+       for Default_Switches ("Ada") use ("-static");
+    end Binder;
+
+    package Linker is
+       for Default_Switches ("Ada") use ("-static", "-lncurses");
+    end Linker;
 end Dangerous_Balloons;
