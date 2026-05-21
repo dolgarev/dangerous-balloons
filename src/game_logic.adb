@@ -323,9 +323,10 @@ package body Game_Logic is
       if not Any_Active then
          Current_Level := Current_Level + 1;
          if Current_Level > Settings.Max_Levels then
-            Current_Level := 1;
+            Victory_Screen := True;
+         else
+            Reset_Level (New_Layout => True);
          end if;
-         Reset_Level (New_Layout => True);
       end if;
    end Check_Level_Cleared;
 
@@ -342,12 +343,13 @@ package body Game_Logic is
          when Maze.Item_Score =>
             Score := Score + Settings.Score_Bonus_Points;
             Grid (Player_Row, Player_Col) := Maze.Empty;
-         when Maze.Door =>
-            Current_Level := Current_Level + 1;
-            if Current_Level > Settings.Max_Levels then
-               Current_Level := 1;
-            end if;
-            Reset_Level (New_Layout => True);
+          when Maze.Door =>
+             Current_Level := Current_Level + 1;
+             if Current_Level > Settings.Max_Levels then
+                Victory_Screen := True;
+             else
+                Reset_Level (New_Layout => True);
+             end if;
          when others =>
             null;
       end case;

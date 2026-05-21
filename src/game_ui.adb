@@ -458,4 +458,31 @@ package body Game_UI is
       Refresh (Standard_Window);
    end Draw_Frame;
 
+   procedure Draw_Victory is
+      L_S : Line_Count;
+      C_S : Column_Count;
+      Row : Line_Position;
+      M1  : constant String := "  C O N G R A T U L A T I O N S !  ";
+      M2  : constant String := "  YOU CLEARED ALL 10 LEVELS!  ";
+      M3  : constant String := "  PRESS SPACE TO CONTINUE  ";
+      M4  : constant String := "  Q - QUIT  ";
+   begin
+      Get_Size (Standard_Window, L_S, C_S);
+      Row := Line_Position (Integer'Max (0, Integer (L_S) / 2 - 3));
+
+      Set_Character_Attributes (Standard_Window, Color => Color_Balloon_F_ID);
+      Center_Text (Row, M1);
+      Center_Text (Row + 1, M2);
+
+      Set_Character_Attributes
+        (Standard_Window, Attr => (Blink => True, others => False),
+         Color                 => Color_Player_ID);
+      Center_Text (Row + 3, M3);
+
+      Set_Character_Attributes (Standard_Window, Color => Color_Status_ID);
+      Center_Text (Row + 4, M4);
+
+      Refresh (Standard_Window);
+   end Draw_Victory;
+
 end Game_UI;

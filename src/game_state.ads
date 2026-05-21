@@ -51,5 +51,6 @@ package Game_State is
    Gen : Rand_Int.Generator;
 
    Quit_Requested : Boolean := False;
+   Victory_Screen : Boolean := False;
 
 end Game_State;

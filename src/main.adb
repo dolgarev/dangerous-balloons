@@ -136,9 +136,31 @@ begin
             Game_Logic.Move_Balloons;
          end if;
 
-         Game_UI.Draw_Frame;
+          Game_UI.Draw_Frame;
 
-         Ch := Get_Keystroke (Standard_Window);
+          if Victory_Screen then
+             Game_UI.Draw_Victory;
+             Set_Timeout_Mode (Standard_Window, Blocking, 0);
+             loop
+                Ch := Get_Keystroke (Standard_Window);
+                exit when Ch = Character'Pos (' ')
+                  or else Ch = Character'Pos (ASCII.LF)
+                  or else Ch = Character'Pos (ASCII.CR);
+                if Ch = Character'Pos ('q') or else Ch = Character'Pos ('Q')
+                then
+                   Quit_Requested := True;
+                   exit Game_Loop;
+                end if;
+             end loop;
+             Score         := 0;
+             Lives         := Settings.Initial_Lives;
+             Current_Level := 1;
+             Victory_Screen := False;
+             Game_Logic.Reset_Level (New_Layout => True);
+             Set_Timeout_Mode (Standard_Window, Non_Blocking, 0);
+          end if;
+
+          Ch := Get_Keystroke (Standard_Window);
          if Ch = Character'Pos ('q') or else Ch = Character'Pos ('Q') then
             exit Game_Loop;
          elsif Ch = Character'Pos ('r') or else Ch = Character'Pos ('R') then
