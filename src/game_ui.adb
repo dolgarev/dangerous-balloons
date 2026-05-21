@@ -459,16 +459,18 @@ package body Game_UI is
    end Draw_Frame;
 
    procedure Draw_Victory is
-      L_S : Line_Count;
-      C_S : Column_Count;
-      Row : Line_Position;
-      M1  : constant String := "  C O N G R A T U L A T I O N S !  ";
-      M2  : constant String := "  YOU CLEARED ALL 10 LEVELS!  ";
-      M3  : constant String := "  PRESS SPACE TO CONTINUE  ";
-      M4  : constant String := "  Q - QUIT  ";
+      L_Count : Line_Count;
+      C_Count : Column_Count;
+      L_Off   : Line_Position;
+      Row     : Line_Position;
+      M1      : constant String := "  C O N G R A T U L A T I O N S !  ";
+      M2      : constant String := "  YOU CLEARED ALL 10 LEVELS!  ";
+      M3      : constant String := "  PRESS SPACE TO RESTART  ";
    begin
-      Get_Size (Standard_Window, L_S, C_S);
-      Row := Line_Position (Integer'Max (0, Integer (L_S) / 2 - 3));
+      Get_Size (Standard_Window, L_Count, C_Count);
+      Erase (Standard_Window);
+
+      Row := Line_Position (Integer'Max (0, Integer (L_Count) / 2 - 2));
 
       Set_Character_Attributes (Standard_Window, Color => Color_Balloon_F_ID);
       Center_Text (Row, M1);
@@ -479,8 +481,32 @@ package body Game_UI is
          Color                 => Color_Player_ID);
       Center_Text (Row + 3, M3);
 
-      Set_Character_Attributes (Standard_Window, Color => Color_Status_ID);
-      Center_Text (Row + 4, M4);
+      L_Off :=
+        Line_Position (Integer (L_Count) - (Maze.Max_Rows + 2)) / 2;
+      if L_Off < 0 then
+         L_Off := 0;
+      end if;
+
+      if Integer (L_Off) + Maze.Max_Rows + 1 < Integer (L_Count) then
+         declare
+            Status  : constant String :=
+              " LEVEL: " & Pad (Current_Level, 2) & "   SCORE: " &
+              Pad (Score, 5) & "   LIVES: " & Pad (Lives, 2) & " ";
+            Padding : constant Integer :=
+              (Integer (C_Count) - Status'Length) / 2;
+            Pad_Str :
+              constant String
+                (1 .. (if Padding > 0 then Padding else 0)) :=
+              [others => ' '];
+         begin
+            Move_Cursor
+              (Standard_Window,
+               L_Off + Line_Position (Maze.Max_Rows + 1), 0);
+            Set_Character_Attributes
+              (Standard_Window, Color => Color_Status_ID);
+            Add (Standard_Window, Pad_Str & Status);
+         end;
+      end if;
 
       Refresh (Standard_Window);
    end Draw_Victory;
