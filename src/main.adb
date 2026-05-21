@@ -69,8 +69,8 @@ begin
       loop
          Set_Timeout_Mode (Standard_Window, Non_Blocking, 0);
 
-         if Clock >= Next_Tick then
-            Next_Tick := Next_Tick + 1.0;
+          if Clock >= Next_Tick then
+             Next_Tick := Clock + 1.0;
 
             Mode_Timer := Mode_Timer + 1;
             if Mode_Timer >= Settings.Mode_Switch_Sec then
