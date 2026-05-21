@@ -1,14 +1,14 @@
 with Terminal_Interface.Curses; use Terminal_Interface.Curses;
 with Terminal_Interface.Curses_Constants;
 with Maze;                      use Maze;
-with Settings;                  use Settings;
+with Settings;
 with Ada.Exceptions;            use Ada.Exceptions;
 with Ada.Text_IO;
 with Ada.Calendar;              use Ada.Calendar;
 
 with Game_State;                use Game_State;
-with Game_UI;                   use Game_UI;
-with Game_Logic;                use Game_Logic;
+with Game_UI;
+with Game_Logic;
 
 procedure Main is
    Ch : Key_Code;
