@@ -167,9 +167,8 @@ package body Game_Logic is
                end;
             end if;
          end loop;
-      end loop;
-      Check_Explosion_Damage (B_Idx);
-   end Explode_Bomb;
+       end loop;
+    end Explode_Bomb;
 
    procedure Move_Balloons is
       function Try_Move_Towards (B : in out Balloon_Rec) return Boolean is
