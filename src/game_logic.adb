@@ -219,18 +219,24 @@ package body Game_Logic is
       begin
          Try_Dir := (abs (Rand_Int.Random (Gen)) mod 4);
 
-         if B.Dir_R /= 0 or B.Dir_C /= 0 then
-            if Grid (B.Row + B.Dir_R, B.Col + B.Dir_C) = Maze.Empty or
-              Grid (B.Row + B.Dir_R, B.Col + B.Dir_C) = Maze.Item_Life or
-              Grid (B.Row + B.Dir_R, B.Col + B.Dir_C) = Maze.Item_Score
-            then
-               if Rand_Int.Random (Gen) < 70 then
-                  B.Row := B.Row + B.Dir_R;
-                  B.Col := B.Col + B.Dir_C;
-                  return;
-               end if;
-            end if;
-         end if;
+          if B.Dir_R /= 0 or B.Dir_C /= 0 then
+             declare
+                NR : constant Integer := B.Row + B.Dir_R;
+                NC : constant Integer := B.Col + B.Dir_C;
+             begin
+                if NR in 1 .. Maze.Max_Rows and then NC in 1 .. Maze.Max_Cols
+                  and then (Grid (NR, NC) = Maze.Empty or
+                            Grid (NR, NC) = Maze.Item_Life or
+                            Grid (NR, NC) = Maze.Item_Score)
+                then
+                   if Rand_Int.Random (Gen) < 70 then
+                      B.Row := NR;
+                      B.Col := NC;
+                      return;
+                   end if;
+                end if;
+             end;
+          end if;
 
          for I in 1 .. 4 loop
             declare
@@ -248,10 +254,11 @@ package body Game_Logic is
                   TC := TC + 1;
                end if;
 
-               if Grid (TR, TC) = Maze.Empty or
-                 Grid (TR, TC) = Maze.Item_Life or
-                 Grid (TR, TC) = Maze.Item_Score
-               then
+                if TR in 1 .. Maze.Max_Rows and then TC in 1 .. Maze.Max_Cols
+                  and then (Grid (TR, TC) = Maze.Empty or
+                            Grid (TR, TC) = Maze.Item_Life or
+                            Grid (TR, TC) = Maze.Item_Score)
+                then
                   B.Dir_R := TR - B.Row;
                   B.Dir_C := TC - B.Col;
                   B.Row   := TR;
